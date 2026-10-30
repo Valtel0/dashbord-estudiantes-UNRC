@@ -1,5 +1,7 @@
 'use client'
 
+import { useUser } from '@/lib/user'
+import { AddSubjectModal } from './add-subject-dialog'
 import { useCallback, useState } from 'react'
 import { CalendarDays, CalendarRange, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -27,6 +29,7 @@ const filters: { value: Filter; dot?: string }[] = [
 
 export function SubjectsBoard() {
   const subjects = useSubjects()
+  const user = useUser()
   const years = Array.from(new Set(subjects.map((s) => s.year))).sort()
   const [view, setView] = useState<View>('plan')
   const [filter, setFilter] = useState<Filter>('all')
@@ -46,14 +49,21 @@ export function SubjectsBoard() {
           <div>
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <CalendarDays className="size-4" aria-hidden="true" />
-              Ciclo lectivo 2026 · 2do cuatrimestre
+              Ciclo lectivo 2026
             </p>
-            <h1 className="mt-1 text-balance text-3xl font-semibold tracking-tight">Hola, Lucía</h1>
+            <h1 className="mt-1 text-balance text-3xl font-semibold tracking-tight">Hola, {user.name}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {view === 'plan'
                 ? 'Este es tu plan de estudios. Tocá una materia bloqueada para ver qué te falta.'
                 : 'Organizá tus parciales, entregas de TP y recordatorios.'}
             </p>
+          </div>
+          <div className='flex flex-wrap items-end justify-between gap-4'>
+            <div>
+              <p className='flex items-center gap-3'>
+                <AddSubjectModal />
+              </p>
+            </div>
           </div>
 
           <div role="tablist" aria-label="Vista" className="flex rounded-2xl border border-border bg-card p-1 shadow-sm">
@@ -131,4 +141,5 @@ export function SubjectsBoard() {
       <CorrelativesPanel subject={selected} open={open} onClose={handleClose} />
     </main>
   )
+  
 }

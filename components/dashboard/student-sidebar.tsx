@@ -1,10 +1,12 @@
 'use client'
+import { useUser } from '@/lib/user'
 import { Award, BookOpen, CircleCheck, Clock, GraduationCap, Lock, TrendingUp } from 'lucide-react'
 import { getStats } from '@/lib/subjects'
 import { ProgressRing } from './progress-ring'
 
 export function StudentSidebar() {
   const stats = getStats()
+  const user = useUser()
 
   const breakdown = [
     { label: 'Aprobadas', value: stats.approved, icon: CircleCheck, className: 'bg-approved/12 text-approved' },
@@ -21,7 +23,7 @@ export function StudentSidebar() {
         </div>
         <div>
           <p className="text-sm font-semibold leading-tight">Campus</p>
-          <p className="text-xs text-muted-foreground">Ingeniería en Sistemas</p>
+          <p className="text-xs text-muted-foreground">{user.career}</p>
         </div>
       </div>
 
@@ -30,8 +32,8 @@ export function StudentSidebar() {
           LM
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium">Lucía Martínez</p>
-          <p className="text-xs text-muted-foreground">Legajo 152.384</p>
+          <p className="truncate text-sm font-medium">{user.name}</p>
+          <p className="text-xs text-muted-foreground">Legajo, {user.studentId}</p>
         </div>
       </div>
 
