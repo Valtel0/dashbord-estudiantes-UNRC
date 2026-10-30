@@ -197,6 +197,9 @@ export const subjectActions = {
   removeSubject(id: string) {
     update((currentSubjects) => recalculateLocks(currentSubjects.filter((s) => s.id !== id)))
   },
+  clearAll() {
+    update(() => [])
+  },
   resetToDefault() {
     cache = []
     persist([])

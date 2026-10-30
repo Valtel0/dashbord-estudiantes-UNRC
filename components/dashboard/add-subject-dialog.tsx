@@ -5,6 +5,8 @@ import { subjectActions, useSubjects } from '@/lib/subjects'
 import { Plus, X } from 'lucide-react'
 
 export function AddSubjectModal() {
+  const [status, setStatus] = useState<'approved' | 'regular' | 'in-progress' | 'available' | 'locked'>('available')
+  const [grade, setGrade] = useState<number | undefined>(undefined)
   const [isOpen, setIsOpen] = useState(false)
   const subjects = useSubjects()
   
@@ -25,7 +27,8 @@ export function AddSubjectModal() {
       year: Number(year),
       semester,
       hours: Number(hours),
-      status: 'locked' as const, // Arranca bloqueada hasta que cumpla requisitos
+      status,
+      grade: status === 'approved' ? grade : undefined,
       requires: [],
     }
 
@@ -67,6 +70,34 @@ export function AddSubjectModal() {
                   className="mt-1 w-full rounded-xl border bg-background px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Condición actual</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as any)}
+                  className="mt-1 w-full rounded-xl border bg-background px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="available">Habilitada / Pendiente</option>
+                  <option value="approved">Aprobada</option>
+                  <option value="regular">Regular</option>
+                  <option value="in-progress">Cursando</option>
+                </select>
+              </div>
+
+              {status === 'approved' && (
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Nota obtenida</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={grade || ''}
+                    onChange={(e) => setGrade(Number(e.target.value))}
+                    placeholder="Ej: 8"
+                    className="mt-1 w-full rounded-xl border bg-background px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

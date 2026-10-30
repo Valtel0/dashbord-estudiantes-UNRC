@@ -1,6 +1,8 @@
-import { BookOpen, ChevronRight, CircleCheck, Clock, Lock, Unlock } from 'lucide-react'
+'use client'
+
+import { BookOpen, ChevronRight, CircleCheck, Clock, Lock, Unlock, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { isRequirementMet, statusLabels, type Subject, type SubjectStatus } from '@/lib/subjects'
+import { isRequirementMet, statusLabels, subjectActions, type Subject, type SubjectStatus } from '@/lib/subjects'
 
 const statusStyles: Record<SubjectStatus, { card: string; bar: string; badge: string; icon: typeof Lock }> = {
   approved: {
@@ -46,15 +48,51 @@ export function SubjectCard({ subject, onSelectLocked }: SubjectCardProps) {
   const isLocked = subject.status === 'locked'
   const missing = subject.requires.filter((r) => !isRequirementMet(r)).length
 
+  // Función para cambiar de estado cíclicamente o mediante selector
+  const handleStatusChange = (newStatus: SubjectStatus) => {
+    let grade = subject.grade
+    if (newStatus === 'approved' && grade === undefined) {
+      grade = 0 // Nota por defecto al marcar aprobada rápidamente
+    }
+    subjectActions.updateStatus(subject.id, newStatus, grade)
+  }
+
   const content = (
     <>
       <span className={cn('absolute inset-y-4 left-0 w-1 rounded-r-full', styles.bar)} aria-hidden="true" />
       <div className="flex items-start justify-between gap-3">
         <span className="font-mono text-[11px] font-medium tracking-wide text-muted-foreground">{subject.code}</span>
-        <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium', styles.badge)}>
-          <Icon className="size-3" aria-hidden="true" />
-          {statusLabels[subject.status]}
-        </span>
+        
+        {/* Selector rápido de estado en la insignia */}
+        <div className="flex items-center gap-1.5">
+          <select
+            value={subject.status}
+            onChange={(e) => handleStatusChange(e.target.value as SubjectStatus)}
+            onClick={(e) => e.stopPropagation()}
+            className={cn('cursor-pointer rounded-full px-2 py-0.5 text-[11px] font-medium border-0 outline-none', styles.badge)}
+          >
+            <option value="available" className="bg-card text-foreground">Habilitada</option>
+            <option value="approved" className="bg-card text-foreground">Aprobada</option>
+            <option value="regular" className="bg-card text-foreground">Regular</option>
+            <option value="in-progress" className="bg-card text-foreground">Cursando</option>
+            {/* <option value="locked" className="bg-card text-foreground">Bloqueada</option> */}
+          </select>
+
+          {/* Botón para eliminar materia */}
+          <button
+            type="button"
+            title="Eliminar materia"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (confirm(`¿Querés eliminar la materia "${subject.name}"?`)) {
+                subjectActions.removeSubject(subject.id)
+              }
+            }}
+            className="rounded-lg p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+          >
+            <Trash2 className="size-3.5" />
+          </button>
+        </div>
       </div>
 
       <h3 className={cn('mt-3 text-pretty text-[15px] font-semibold leading-snug', isLocked && 'text-muted-foreground')}>
@@ -65,11 +103,25 @@ export function SubjectCard({ subject, onSelectLocked }: SubjectCardProps) {
         <span>
           {subject.semester === 'Anual' ? 'Anual' : `${subject.semester === '1C' ? '1er' : '2do'} cuatrimestre`} · {subject.hours} hs
         </span>
-        {subject.status === 'approved' && subject.grade !== undefined && (
-          <span className="rounded-md bg-card px-2 py-0.5 text-sm font-semibold text-foreground shadow-xs">
-            {subject.grade}
-          </span>
+
+        {subject.status === 'approved' && (
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            <span className="font-medium text-muted-foreground">Nota:</span>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={subject.grade ?? ''}
+              onChange={(e) => {
+                const newGrade = e.target.value ? Number(e.target.value) : undefined
+                subjectActions.updateStatus(subject.id, 'approved', newGrade)
+              }}
+              placeholder="S/N"
+              className="w-12 rounded-md border bg-card px-1.5 py-0.5 text-center text-sm font-semibold text-foreground shadow-xs outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
         )}
+
         {isLocked && (
           <span className="flex items-center gap-0.5 font-medium text-foreground/70 transition-transform group-hover:translate-x-0.5">
             Faltan {missing}
@@ -87,14 +139,9 @@ export function SubjectCard({ subject, onSelectLocked }: SubjectCardProps) {
 
   if (isLocked) {
     return (
-      <button
-        type="button"
-        onClick={() => onSelectLocked(subject)}
-        className={cn(base, 'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring')}
-        aria-label={`${subject.name}: bloqueada. Ver correlativas faltantes`}
-      >
+      <div className={base}>
         {content}
-      </button>
+      </div>
     )
   }
 

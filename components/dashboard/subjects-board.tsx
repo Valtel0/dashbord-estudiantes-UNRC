@@ -1,5 +1,8 @@
 'use client'
 
+import { subjectActions } from '@/lib/subjects'
+import { Trash2 } from 'lucide-react'
+import { ImportPdfModal } from './import-pdf-modal'
 import { useUser } from '@/lib/user'
 import { AddSubjectModal } from './add-subject-dialog'
 import { useCallback, useState } from 'react'
@@ -36,6 +39,7 @@ export function SubjectsBoard() {
   const [selected, setSelected] = useState<Subject | null>(null)
   const [open, setOpen] = useState(false)
 
+
   const handleSelect = useCallback((subject: Subject) => {
     setSelected(subject)
     setOpen(true)
@@ -58,13 +62,22 @@ export function SubjectsBoard() {
                 : 'Organizá tus parciales, entregas de TP y recordatorios.'}
             </p>
           </div>
-          <div className='flex flex-wrap items-end justify-between gap-4'>
-            <div>
-              <p className='flex items-center gap-3'>
-                <AddSubjectModal />
-              </p>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <ImportPdfModal />
+            <AddSubjectModal />
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm('¿Estás seguro de que querés eliminar todas las materias del plan?')) {
+                subjectActions.clearAll()
+              }
+            }}
+            className="inline-flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive shadow-sm transition-all hover:bg-destructive/20"
+          >
+            <Trash2 className="size-4" />
+            Eliminar todas las materias
+          </button>
 
           <div role="tablist" aria-label="Vista" className="flex rounded-2xl border border-border bg-card p-1 shadow-sm">
             {views.map(({ value, label, icon: Icon }) => {
