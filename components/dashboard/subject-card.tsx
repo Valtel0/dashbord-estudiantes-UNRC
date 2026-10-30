@@ -1,4 +1,4 @@
-import { BookOpen, ChevronRight, CircleCheck, Clock, Lock } from 'lucide-react'
+import { BookOpen, ChevronRight, CircleCheck, Clock, Lock, Unlock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { isRequirementMet, statusLabels, type Subject, type SubjectStatus } from '@/lib/subjects'
 
@@ -21,6 +21,12 @@ const statusStyles: Record<SubjectStatus, { card: string; bar: string; badge: st
     badge: 'bg-progress/20 text-progress-foreground',
     icon: Clock,
   },
+  available: {
+    card: 'border-sky-500/30 bg-sky-500/[0.06] hover:border-sky-500/60 hover:shadow-sky-500/10',
+    bar: 'bg-sky-500',
+    badge: 'bg-sky-500/12 text-sky-600 dark:text-sky-400',
+    icon: Unlock,
+  },
   locked: {
     card: 'border-dashed border-border bg-muted/70 opacity-75 hover:opacity-100 hover:border-locked/50',
     bar: 'bg-locked/40',
@@ -35,7 +41,7 @@ type SubjectCardProps = {
 }
 
 export function SubjectCard({ subject, onSelectLocked }: SubjectCardProps) {
-  const styles = statusStyles[subject.status]
+  const styles = statusStyles[subject.status] || statusStyles.locked
   const Icon = styles.icon
   const isLocked = subject.status === 'locked'
   const missing = subject.requires.filter((r) => !isRequirementMet(r)).length

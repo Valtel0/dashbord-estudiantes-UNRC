@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react'
 import { CalendarDays, CalendarRange, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { statusLabels, subjects, type Subject, type SubjectStatus } from '@/lib/subjects'
+import { statusLabels, useSubjects, type Subject, type SubjectStatus } from '@/lib/subjects'
 import { YearSection } from './year-section'
 import { CorrelativesPanel } from './correlatives-panel'
 import { CalendarView } from './calendar/calendar-view'
@@ -24,9 +24,10 @@ const filters: { value: Filter; dot?: string }[] = [
   { value: 'locked', dot: 'bg-locked' },
 ]
 
-const years = Array.from(new Set(subjects.map((s) => s.year))).sort()
 
 export function SubjectsBoard() {
+  const subjects = useSubjects()
+  const years = Array.from(new Set(subjects.map((s) => s.year))).sort()
   const [view, setView] = useState<View>('plan')
   const [filter, setFilter] = useState<Filter>('all')
   const [selected, setSelected] = useState<Subject | null>(null)
